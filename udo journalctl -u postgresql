@@ -1,0 +1,10 @@
+[0;1;32m●[0m postgresql.service - PostgreSQL RDBMS
+     Loaded: loaded (/lib/systemd/system/postgresql.service; enabled; vendor preset: enabled)
+     Active: [0;1;32mactive (exited)[0m since Fri 2025-04-25 23:55:53 -03; 13h ago
+   Main PID: 1049 (code=exited, status=0/SUCCESS)
+      Tasks: 0 (limit: 9267)
+     Memory: 0B
+     CGroup: /system.slice/postgresql.service
+
+abr 25 23:55:53 bsquintan-Inspiron-5566 systemd[1]: Starting PostgreSQL RDBMS...
+abr 25 23:55:53 bsquintan-Inspiron-5566 systemd[1]: Finished PostgreSQL RDBMS.
