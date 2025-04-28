@@ -110,6 +110,39 @@ RSpec.describe 'Posts API', type: :request do
     end
   end
 
+  describe 'GET /api/v1/posts/authors_ips_list' do
+    before(:all) { Faker::UniqueGenerator.clear }
+
+    let!(:user1) { create(:user, login: Faker::Internet.unique.username) }
+    let!(:user2) { create(:user, login: Faker::Internet.unique.username) }
+    let!(:user3) { create(:user, login: Faker::Internet.unique.username) }
+
+    let!(:ip1) { Faker::Internet.ip_v4_address }
+    let!(:ip2) { Faker::Internet.ip_v4_address }
+
+    before do
+      create(:post, user: user1, ip: ip1)
+      create(:post, user: user2, ip: ip1)
+      create(:post, user: user3, ip: ip2)
+    end
+
+    it 'returns a list of IPs with associated unique user logins' do
+      get '/api/v1/posts/authors_ips_list'
+
+      expect(response).to have_http_status(:ok)
+      expect(json).to be_an(Array)
+
+      expect(json.size).to eq(2)
+
+      ip1_data = json.find { |entry| entry['ip'] == ip1 }
+      expect(ip1_data).not_to be_nil
+      expect(ip1_data['logins']).to contain_exactly(user1.login, user2.login)
+
+      ip2_data = json.find { |entry| entry['ip'] == ip2 }
+      expect(ip2_data).not_to be_nil
+      expect(ip2_data['logins']).to contain_exactly(user3.login)
+    end
+  end
 
   def json
     JSON.parse(response.body)

@@ -15,7 +15,10 @@ Rails.application.routes.draw do
           get :top_rated
         end
       end
+
       resources :ratings, only: [ :create ]
+
+      get "posts/authors_ips_list", to: "posts#authors_ips_list"
     end
   end
 end

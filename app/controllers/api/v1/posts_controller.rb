@@ -31,6 +31,20 @@ module Api
         render json: posts.as_json(only: [ :id, :title, :body ])
       end
 
+      def authors_ips_list
+        posts = Post.includes(:user).all
+
+        grouped_ips = posts.group_by(&:ip).map do |ip, posts|
+          {
+            ip: ip,
+            logins: posts.map { |p| p.user.login }.uniq
+          }
+        end
+
+        render json: grouped_ips, status: :ok
+      end
+
+
       private
 
       def post_params
