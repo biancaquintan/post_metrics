@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :user do
-    login { 'tester' }
+    login { Faker::Internet.username }
   end
 end
