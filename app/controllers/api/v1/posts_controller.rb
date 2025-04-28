@@ -20,6 +20,17 @@ module Api
         end
       end
 
+      def top_rated
+        posts = Post.left_outer_joins(:ratings)
+                    .select("posts.*, COALESCE(AVG(ratings.value), 0) AS average_rating")
+                    .group("posts.id")
+                    .order("average_rating DESC")
+
+        posts = posts.limit(params[:limit]) if params[:limit].present?
+
+        render json: posts.as_json(only: [ :id, :title, :body ])
+      end
+
       private
 
       def post_params
