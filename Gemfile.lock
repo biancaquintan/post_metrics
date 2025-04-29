@@ -347,6 +347,7 @@ DEPENDENCIES
   rails (~> 8.0.2)
   rspec-rails
   rubocop-rails-omakase
+  ruby-progressbar
   shoulda-matchers (~> 5.0)
   solid_cable
   solid_cache
