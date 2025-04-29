@@ -19,7 +19,7 @@ Rails.application.routes.draw do
         end
       end
 
-      post 'users', to: 'users#create'
+      post "users", to: "users#create"
       get "posts/authors_ips_list", to: "posts#authors_ips_list"
     end
   end
