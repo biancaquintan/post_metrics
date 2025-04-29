@@ -58,6 +58,19 @@ Acesse `http://localhost:3000` para usar a API.
 
 ---
 
+## 🌱 Populando o Banco de Dados
+
+Este projeto possui um arquivo `db/seeds.rb` que pode ser usado para popular o banco de dados.
+
+### Executando o Seed
+
+Para rodar o seed e utilizar esses dados, execute o seguinte comando:
+
+```bash
+rails db:seed
+```
+---
+
 ## 📚 Endpoints principais
 
 ### Criar Post
