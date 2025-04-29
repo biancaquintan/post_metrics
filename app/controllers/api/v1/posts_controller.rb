@@ -20,6 +20,34 @@ module Api
         end
       end
 
+      def batch_create
+        posts_params = params.require(:posts)
+
+        created_posts = []
+        errors = []
+
+        posts_params.each_with_index do |post_data, index|
+          user = User.find_or_create_by!(login: post_data[:login])
+          post = user.posts.build(
+            title: post_data[:title],
+            body: post_data[:body],
+            ip: post_data[:ip]
+          )
+
+          if post.save
+            created_posts << post
+          else
+            errors << { index: index, errors: post.errors.full_messages }
+          end
+        end
+
+        if errors.empty?
+          render json: { message: "#{created_posts.size} posts created successfully." }, status: :created
+        else
+          render json: { created: created_posts.size, errors: errors }, status: :unprocessable_entity
+        end
+      end
+
       def top_rated
         posts = Post.left_outer_joins(:ratings)
                     .select("posts.*, COALESCE(AVG(ratings.value), 0) AS average_rating")

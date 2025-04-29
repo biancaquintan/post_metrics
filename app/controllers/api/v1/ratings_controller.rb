@@ -18,6 +18,29 @@ module Api
       rescue ActiveRecord::RecordNotUnique
         render json: { errors: [ "User has already rated this post" ] }, status: :unprocessable_entity
       end
+
+      def batch_create
+        ratings = params.require(:ratings)
+
+        Rating.transaction do
+          ratings.each do |rating_params|
+            Rating.create!(
+              user_id: rating_params[:user_id],
+              post_id: rating_params[:post_id],
+              value: rating_params[:value]
+            )
+          end
+        end
+
+        render json: { message: "Batch ratings created successfully" }, status: :created
+
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+      rescue ActiveRecord::RecordNotUnique
+        render json: { errors: [ "A user has already rated this post." ] }, status: :unprocessable_entity
+      rescue ActionController::ParameterMissing => e
+        render json: { errors: [ e.message ] }, status: :bad_request
+      end
     end
   end
 end
