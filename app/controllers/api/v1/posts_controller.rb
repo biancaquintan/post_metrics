@@ -21,7 +21,7 @@ module Api
       end
 
       def batch_create
-        posts_params = params.require(:posts)
+        posts_params = post_params_array
 
         created_posts = []
         errors = []
@@ -77,6 +77,12 @@ module Api
 
       def post_params
         params.require(:post).permit(:user_id, :title, :body, :ip)
+      end
+
+      def post_params_array
+        params.require(:posts).map do |post|
+          post.permit(:login, :title, :body, :ip)
+        end
       end
     end
   end
