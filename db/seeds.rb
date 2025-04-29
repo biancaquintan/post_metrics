@@ -1,12 +1,13 @@
 require 'faker'
 require 'open3'
 require 'json'
+require 'ruby-progressbar'
 
-puts "=== INICIANDO SCRIPT ==="
+puts "\n=== INICIANDO SCRIPT 🚀\n\n"
 
-User.delete_all
-Post.delete_all
 Rating.delete_all
+Post.delete_all
+User.delete_all
 
 def send_curl(url, payload)
   command = %(curl -s -X POST #{url} -H "Content-Type: application/json" -d '#{payload}')
@@ -15,9 +16,7 @@ def send_curl(url, payload)
   begin
     stdout, stderr, status = Open3.capture3(command)
 
-    unless status.success?
-      raise "Erro ao fazer requisição: #{stderr}"
-    end
+    raise "Erro ao fazer requisição: #{stderr}" unless status.success?
 
     stdout
   rescue => e
@@ -73,9 +72,17 @@ puts ">>> Criando posts em lote..."
 
 posts_to_create = []
 total_posts = 200_000
-batch_size = 1000
+batch_size = 500
+posts_created = 0
 
-total_posts.times do |i|
+posts_progressbar = ProgressBar.create(
+  title: 'Posts',
+  total: total_posts,
+  format: '%t [%B] %p%% %e',
+  projector: { type: 'smoothing', strength: 0.8 }
+)
+
+total_posts.times do
   posts_to_create << {
     login: user_logins.sample,
     title: Faker::Movie.title,
@@ -85,12 +92,19 @@ total_posts.times do |i|
 
   if posts_to_create.size == batch_size
     create_posts_batch(posts_to_create)
+    posts_created += posts_to_create.size
     posts_to_create.clear
-    puts "#{i + 1} posts criados" if (i + 1) % batch_size == 0
+    posts_created.times { posts_progressbar.increment }
+    posts_created = 0
   end
 end
 
-create_posts_batch(posts_to_create) unless posts_to_create.empty?
+unless posts_to_create.empty?
+  create_posts_batch(posts_to_create)
+  posts_to_create.size.times { posts_progressbar.increment }
+end
+
+posts_progressbar.finish
 
 ############## CRIANDO RATINGS ##############
 puts ">>> Criando ratings em lote..."
@@ -99,9 +113,17 @@ user_map = User.pluck(:login, :id).to_h
 post_ids = Post.pluck(:id)
 
 ratings_to_create = []
-batch_size = 500
+ratings_created = 0
+estimated_total_ratings = (post_ids.size * 0.75).to_i
 
-post_ids.each_with_index do |post_id, index|
+ratings_progressbar = ProgressBar.create(
+  title: 'Ratings',
+  total: estimated_total_ratings,
+  format: '%t [%B] %p%% %e',
+  projector: { type: 'smoothing', strength: 0.8 }
+)
+
+post_ids.each do |post_id|
   next if rand > 0.75
 
   login = user_logins.sample
@@ -114,18 +136,19 @@ post_ids.each_with_index do |post_id, index|
     value: rating_value
   }
 
+  ratings_created += 1
+
+  if ratings_progressbar.progress < ratings_progressbar.total
+    ratings_progressbar.increment
+  end
+
   if ratings_to_create.size == batch_size
     create_ratings_batch(ratings_to_create)
     ratings_to_create.clear
-    puts "#{index} ratings criados" if (index + 1) % batch_size == 0
   end
 end
 
-unless ratings_to_create.empty?
-  create_ratings_batch(ratings_to_create)
-  puts "#{ratings_to_create.size} ratings criados"
-end
-
 create_ratings_batch(ratings_to_create) unless ratings_to_create.empty?
+ratings_progressbar.finish
 
-puts "=== SCRIPT FINALIZADO ==="
+puts "\n=== SCRIPT FINALIZADO 🏁\n\n"
