@@ -49,7 +49,7 @@ group :development, :test do
 
   gem "rspec-rails"
   gem "factory_bot_rails"
-  gem "shoulda-matchers", "~> 5.0"
+  gem "shoulda-matchers", "~> 6.5"
   gem "faker", "~> 3.5", ">= 3.5.1"
   gem "ruby-progressbar"
 end
